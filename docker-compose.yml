@@ -1,0 +1,43 @@
+services:
+  mongodb:
+    image: mongo:6
+    container_name: bookhaven-mongodb
+    restart: unless-stopped
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - bookhaven-network
+
+  backend:
+    build:
+      context: ./backend
+    container_name: bookhaven-backend
+    restart: unless-stopped
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/bookhaven
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+    networks:
+      - bookhaven-network
+
+  frontend:
+    build:
+      context: ./client
+    container_name: bookhaven-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - bookhaven-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  bookhaven-network:
+    driver: bridge
