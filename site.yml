@@ -1,0 +1,9 @@
+---
+- name: Configure BookHaven Kubernetes node
+  hosts: kubernetes
+  become: true
+  roles:
+    - install-docker
+    - setup-mongodb
+    - backend-deployment
+    - frontend-deployment

@@ -1,4 +1,8 @@
 ---
-container_name: bookhaven-backend
-network: app-net
-volume: app-mongo-data/app
+backend_image: hodhan/bookhaven-backend:v1.0.0
+backend_container_name: bookhaven-backend
+backend_network: app-net
+backend_host_port: "5000"
+backend_container_port: "5000"
+backend_mongodb_uri: "mongodb://app-mongo:27017/bookhaven"
+backend_port: "5000"

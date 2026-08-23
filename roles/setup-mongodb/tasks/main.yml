@@ -1,14 +1,25 @@
 ---
-- name: Run MongoDB Container
-  docker_container:
-    name: app-mongo
-    image: mongo
+- name: Create BookHaven Docker network
+  community.docker.docker_network:
+    name: "{{ mongo_network }}"
+    state: present
+
+- name: Create MongoDB volume
+  community.docker.docker_volume:
+    name: "{{ mongo_volume }}"
+    state: present
+
+- name: Run MongoDB container
+  community.docker.docker_container:
+    name: "{{ mongo_container_name }}"
+    image: "{{ mongo_image }}"
+    state: started
+    restart_policy: unless-stopped
     ports:
-      - '27017:27017'
+      - "27017:27017"
     volumes:
-      - ./app-mongo-data:/data/db
+      - "{{ mongo_volume }}:/data/db"
     networks:
-      - name: app-net
+      - name: "{{ mongo_network }}"
   tags:
     - database
-    - backend

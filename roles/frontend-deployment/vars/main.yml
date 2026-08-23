@@ -1,0 +1,6 @@
+---
+frontend_image: hodhan/bookhaven-frontend:v1.0.2
+frontend_container_name: bookhaven-frontend
+frontend_host_port: "3000"
+frontend_container_port: "80"
+frontend_network: app-net
