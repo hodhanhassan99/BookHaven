@@ -1,16 +1,20 @@
 ---
 - name: Pull image from repository
-  docker_image:
-    name: yourdockerhubuser/bookhaven-backend:v1.0.0
+  community.docker.docker_image:
+    name: "{{ backend_image }}"
     source: pull
 
 - name: Create Node.js Backend Container
-  docker_container:
-    name: bookhaven-backend
-    image: yourdockerhubuser/bookhaven-backend:v1.0.0
+  community.docker.docker_container:
+    name: "{{ backend_container_name }}"
+    image: "{{ backend_image }}"
     networks:
-      - name: app-net
+      - name: "{{ backend_network }}"
     ports:
-      - "5000:5000"
+      - "{{ backend_host_port }}:{{ backend_container_port }}"
+    env:
+      MONGODB_URI: "{{ backend_mongodb_uri }}"
+      PORT: "{{ backend_port }}"
     command: "npm start"
-  become: yes
+    state: started
+    restart_policy: unless-stopped
