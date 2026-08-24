@@ -1,11 +1,11 @@
 ---
 - name: Pull frontend image from repository
-  docker_image:
+  community.docker.docker_image:
     name: "{{ frontend_image }}"
     source: pull
 
 - name: Create BookHaven frontend container
-  docker_container:
+  community.docker.docker_container:
     name: "{{ frontend_container_name }}"
     image: "{{ frontend_image }}"
     state: started
@@ -14,4 +14,3 @@
       - name: "{{ frontend_network }}"
     ports:
       - "{{ frontend_host_port }}:{{ frontend_container_port }}"
-  become: true
