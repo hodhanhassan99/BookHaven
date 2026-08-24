@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookhaven-frontend
+  labels:
+    app: bookhaven
+    component: frontend
+spec:
+  type: LoadBalancer
+  selector:
+    app: bookhaven
+    component: frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
