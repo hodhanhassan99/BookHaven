@@ -1,14 +1,14 @@
-# install dependencies
+# Install production dependencies
 FROM node:13-alpine AS dependencies
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install --only=production
+RUN npm ci --omit=dev
 
 
-# create the final application image
+# Create the final application image
 FROM node:13-alpine
 
 WORKDIR /app

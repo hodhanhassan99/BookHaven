@@ -1,5 +1,5 @@
 ---
-backend_image: hodhan/bookhaven-backend:v1.0.0
+backend_image: hodhan/bookhaven-backend:v1.0.1
 backend_container_name: bookhaven-backend
 backend_network: app-net
 backend_host_port: "5000"
