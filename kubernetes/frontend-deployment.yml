@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookhaven-frontend
+  labels:
+    app: bookhaven
+    component: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookhaven
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: bookhaven
+        component: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: hodhan/bookhaven-frontend:v1.0.2
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "250m"
