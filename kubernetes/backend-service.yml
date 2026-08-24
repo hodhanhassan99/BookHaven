@@ -6,6 +6,7 @@ metadata:
     app: bookhaven
     component: backend
 spec:
+  type: LoadBalancer
   selector:
     app: bookhaven
     component: backend
