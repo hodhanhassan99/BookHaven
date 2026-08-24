@@ -29,8 +29,8 @@ jobs:
           context: ./backend
           push: true
           tags: |
+            hodhan/bookhaven-backend:v1.0.0
             hodhan/bookhaven-backend:latest
-            hodhan/bookhaven-backend:${{ github.sha }}
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
@@ -38,5 +38,5 @@ jobs:
           context: ./client
           push: true
           tags: |
+            hodhan/bookhaven-frontend:v1.0.0
             hodhan/bookhaven-frontend:latest
-            hodhan/bookhaven-frontend:${{ github.sha }}
