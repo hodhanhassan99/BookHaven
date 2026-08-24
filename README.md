@@ -1,46 +1,71 @@
 # BookHaven
 
-A library catalog app (MERN stack) — React frontend, Node/Express + MongoDB backend.
+BookHaven is a MERN stack library catalog application consisting of a React frontend, Node.js/Express backend, and MongoDB database.
 
-# Requirements
-Install the following:
-- [Node.js](https://nodejs.org/)
-- [MongoDB](https://www.mongodb.com/try/download/community)
-- [Docker](https://docs.docker.com/engine/install/) (for containerization)
-- [Vagrant](https://www.vagrantup.com/) + [VirtualBox](https://www.virtualbox.org/) (for provisioning)
-- [Ansible](https://docs.ansible.com/) (for configuration management)
+This project was extended as part of the eMobilis DevOps Engineering Course final capstone to demonstrate Git workflows, CI/CD, containerization, cloud infrastructure, Ansible configuration management, and Kubernetes orchestration on GKE.
 
-## Run locally (without Docker)
+## Live Application
 
-```bash
-# backend
-cd backend
-npm install
-npm start   # runs on port 5000
+**Frontend:**
+http://34.35.14.77
 
-# frontend (in a separate terminal)
-cd client
-npm install
-npm start   # runs on port 3000
-```
+**Backend API:**
+http://34.35.116.179:5000/api/books
 
-> **Note:** `npm start`/`npm run build` in `client/` set `NODE_OPTIONS=--openssl-legacy-provider`
-> under the hood. This app uses an older react-scripts (3.x) whose bundled webpack 4
-> is incompatible with the OpenSSL 3 changes in Node 17+. The flag works around it —
-> no action needed, just don't remove it from `package.json`.
+The frontend is publicly accessible and retrieves book data from the backend API.
 
-Seed some books via the "Add a book" form once both are running.
+## Technology Stack
 
-## How to run with Vagrant + Ansible
+- React
+- Node.js
+- Express
+- MongoDB
+- Docker
+- Docker Compose
+- GitHub Actions
+- Docker Hub
+- Terraform
+- Ansible
+- Kubernetes
+- Google Kubernetes Engine (GKE)
 
-```bash
-vagrant up --provision
-```
+## Project Architecture
 
-This provisions a VM, then runs `playbook.yml`, which applies the three
-roles in `roles/`:
-- `setup-mongodb` — runs a MongoDB container
-- `backend-deployment` — pulls and runs the backend image
-- `frontend-deployment` — left for you to complete
-
-See `Structure` for the ansible-playbook directory layout.
+```text
+Developer
+    |
+    v
+Git Feature Branch
+    |
+    v
+Pull Request
+    |
+    v
+master
+    |
+    v
+GitHub Actions
+    |
+    +----> CI Tests
+    |
+    +----> Build Docker Images
+    |
+    +----> Push Images to Docker Hub
+    |
+    v
+Kubernetes / GKE
+    |
+    +----> Frontend Deployment
+    |
+    +----> Backend Deployment
+    |
+    +----> MongoDB StatefulSet
+    |             |
+    |             v
+    |       Persistent Storage
+    |
+    v
+LoadBalancer Services
+    |
+    v
+Live BookHaven Application

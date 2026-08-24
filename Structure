@@ -1,18 +1,45 @@
-ansible-playbook/
-├── roles/
-│   ├── setup-mongodb/
-│   │   ├── tasks/
-│   │   │   └── main.yml
-│   │   └── vars/
-│   │       └── main.yml
-│   ├── backend-deployment/
-│   │   ├── tasks/
-│   │   │   └── main.yml
-│   │   └── vars/
-│   │       └── main.yml
-│   └── frontend-deployment/
-│       ├── tasks/
-│       │   └── main.yml
-│       └── vars/
-│           └── main.yml
-└── playbook.yml
+BookHaven/
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       └── cd.yml
+│
+├── backend/
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── models/
+│   └── server.js
+│
+├── client/
+│   ├── Dockerfile
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── public/
+│   └── src/
+│
+├── kubernetes/
+│   ├── backend-deployment.yml
+│   ├── backend-service.yml
+│   ├── frontend-deployment.yml
+│   ├── frontend-service.yml
+│   ├── mongodb-headless-service.yml
+│   └── mongodb-statefulset.yml
+│
+├── terraform/
+│   ├── main.tf
+│   ├── provider.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── terraform.tfvars.example
+│   └── .terraform.lock.hcl
+│
+├── docker-compose.yml
+├── Vagrantfile
+├── ansible.cfg
+├── hosts
+├── site.yml
+├── Structure
+├── explanation.md
+├── README.md
+└── .gitignore
