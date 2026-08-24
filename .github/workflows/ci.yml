@@ -34,6 +34,18 @@ jobs:
         working-directory: client
         run: npm ci
 
+      - name: Verify frontend test files
+        working-directory: client
+        run: |
+          echo "Current commit:"
+          git rev-parse HEAD
+          echo "Test files:"
+          find src -type f | sort
+          echo "Git tracked test file:"
+          git ls-files src/components/App.test.js
+          echo "Test file contents:"
+          cat src/components/App.test.js
+
       - name: Run frontend tests
         working-directory: client
         run: CI=true npm test -- --watchAll=false
