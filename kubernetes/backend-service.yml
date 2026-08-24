@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookhaven-backend
+  labels:
+    app: bookhaven
+    component: backend
+spec:
+  selector:
+    app: bookhaven
+    component: backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
