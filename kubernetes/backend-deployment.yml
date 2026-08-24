@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookhaven-backend
+  labels:
+    app: bookhaven
+    component: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookhaven
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: bookhaven
+        component: backend
+    spec:
+      containers:
+        - name: backend
+          image: hodhan/bookhaven-backend:v1.0.0
+          ports:
+            - containerPort: 5000
+          env:
+            - name: MONGODB_URI
+              value: "mongodb://mongodb:27017/bookhaven"
+            - name: PORT
+              value: "5000"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
