@@ -1,33 +1,35 @@
 # BookHaven DevOps Capstone — Project Explanation
 
-## 1. Git Workflow
+## Git Workflow
 
-The project was developed using Git feature branches and pull requests into `master`.
+The BookHaven project was developed using a feature-branch workflow with pull requests used to merge completed work into the `master` branch.
 
-Each major phase was developed separately to keep changes organized and traceable. Feature branches used included:
+Each major phase of the project was developed separately so that changes remained organized, traceable, and easier to review. The feature branches used included:
 
-- `feature/local-foundation`
-- `feature/containerization`
-- `feature/cicd-automation`
-- `feature/cloud-infrastructure`
-- `feature/ansible-completion`
-- `feature/kubernetes-orchestration`
-- `feature/kubernetes-validation`
-- `feature/kubernetes-health-probes`
-- `feature/cd-pipeline`
-- `feature/cd-semver`
+* `feature/local-foundation`
+* `feature/containerization`
+* `feature/cicd-automation`
+* `feature/cloud-infrastructure`
+* `feature/ansible-completion`
+* `feature/kubernetes-orchestration`
+* `feature/kubernetes-validation`
+* `feature/kubernetes-health-probes`
+* `feature/cd-pipeline`
+* `feature/cd-semver`
+* `feature/documentation`
+* `fix/ci-node-version`
 
-Pull requests were used to review and merge completed work into `master`.
+After completing work on a feature, the changes were committed with descriptive commit messages, pushed to GitHub, reviewed through a pull request, and merged into `master`.
 
-The repository was kept clean by avoiding `.env` files, `node_modules`, and other generated or sensitive files.
+The repository uses a clean `.gitignore` to prevent generated, sensitive, and environment-specific files from being committed. This includes `.env` files, `node_modules`, Terraform state files, Terraform variable files, and other local configuration files.
 
-## 2. CI/CD Pipeline
+## CI/CD Pipeline
 
-GitHub Actions is used to automate the CI/CD process.
+GitHub Actions is used to automate continuous integration and continuous delivery.
 
-The CI workflow runs when code is pushed and installs dependencies before running the available tests.
+The CI workflow runs whenever code is pushed to the repository. It installs the required dependencies and runs the available tests to help detect problems before changes are merged.
 
-The CD workflow runs when changes are merged into `master`. It:
+The CD workflow runs when changes are pushed to the `master` branch after the feature branch and pull request workflow. The pipeline:
 
 1. Checks out the repository.
 2. Sets up Docker Buildx.
@@ -36,86 +38,172 @@ The CD workflow runs when changes are merged into `master`. It:
 5. Builds the frontend Docker image.
 6. Pushes both images to Docker Hub.
 
-The images use semantic version tags such as `v1.0.0`. SHA and `latest` tags are also maintained for traceability and convenience.
+The images use semantic version tags such as `v1.0.0`, which makes releases easier to identify and manage. A `latest` tag is also maintained for convenience.
 
-Docker Hub repositories:
+The Docker Hub repositories are:
 
-- `hodhan/bookhaven-backend`
-- `hodhan/bookhaven-frontend`
+* `hodhan/bookhaven-backend`
+* `hodhan/bookhaven-frontend`
 
-## 3. Containerization
+This automation reduces the need to manually build and push images and provides a repeatable process for creating container images.
 
-The backend and frontend each have their own Dockerfile.
+## Containerization
 
-The backend container uses a lightweight Node.js base image and exposes port `5000`.
+The BookHaven application consists of a React frontend, a Node.js and Express backend, and MongoDB for data storage.
 
-The frontend uses a multi-stage build. The application is built first and the resulting static files are served using Nginx.
+The backend and frontend each have their own Dockerfile. The Dockerfiles use lightweight base images and multi-stage builds where appropriate to reduce unnecessary dependencies in the final images.
 
-Docker Compose is used to run:
+The backend container exposes port `5000`.
 
-- Frontend
-- Backend
-- MongoDB
+The frontend is built into static production files and served using Nginx, which exposes the application on port `80`.
 
-MongoDB uses a named volume so database data can survive container restarts.
+Docker Compose is used to orchestrate the complete application locally. It runs:
 
-The Docker images were kept below the project's 400MB target.
+* Frontend
+* Backend
+* MongoDB
 
-## 4. Terraform and Infrastructure
+The services communicate through the Docker Compose network, allowing containers to communicate using their service names rather than requiring hard-coded IP addresses.
 
-Terraform was used to provision the cloud infrastructure required for the Kubernetes environment.
+MongoDB uses a named volume to provide persistent storage. This allows database data to survive container restarts and recreation.
 
-The infrastructure configuration separates provisioning from application configuration.
+Semantic version tags are used for Docker images, and the images were kept within the project's target size of under 400 MB.
 
-Terraform is responsible for creating the required cloud resources, while Ansible is used to configure provisioned systems.
+## Terraform and Infrastructure as Code
 
-Terraform outputs can be used to provide the information required by the Ansible inventory.
+Terraform was used to define and provision cloud infrastructure as code.
 
-## 5. Ansible Configuration
+The Terraform configuration provisions the AWS resources required for the project infrastructure, including:
 
-Ansible was used for configuration management.
+* Virtual Private Cloud
+* Public subnet
+* Internet Gateway
+* Route table and route table association
+* Security group
+* EC2 compute instance
 
-The project contains roles for:
+Variables are used to make the Terraform configuration easier to reuse and modify, while outputs expose useful infrastructure information such as the public IP address of the provisioned instance.
 
-- MongoDB setup
-- Backend deployment
-- Frontend deployment
+Terraform separates infrastructure provisioning from application configuration. Terraform is responsible for creating the cloud resources, while Ansible is responsible for configuring the provisioned server.
 
-The purpose of Ansible is to make server configuration repeatable and consistent rather than relying on manual configuration.
+The Terraform output was used to provide the public IP address required by the Ansible inventory. Manual copying of this output was used, which satisfies the project requirement, while dynamic inventory would be a possible future improvement.
 
-## 6. Kubernetes Architecture
+The Terraform-managed AWS infrastructure was successfully provisioned and verified during development. After verification, it was destroyed using `terraform destroy` to avoid unnecessary cloud charges.
 
-The application is deployed on Google Kubernetes Engine (GKE).
+## Ansible Configuration Management
 
-The Kubernetes deployment consists of a frontend Deployment, backend Deployment, and MongoDB StatefulSet.
+Ansible was used to configure the server provisioned by Terraform.
 
-The backend runs as a Kubernetes Deployment using the `hodhan/bookhaven-backend:v1.0.1` image. It exposes port `5000`, uses one replica, and has configured resource requests and limits. Readiness and liveness probes check the `/api/books` endpoint. The backend is exposed through a LoadBalancer Service.
+The Ansible inventory referenced the public IP address produced by the Terraform infrastructure.
 
-The frontend runs as a Kubernetes Deployment using the `hodhan/bookhaven-frontend:v1.0.3` image. It exposes port `80`, uses one replica, and has configured resource requests and limits. Readiness and liveness probes check `/`. The frontend is exposed through a LoadBalancer Service.
+The project contains the required roles for:
 
-MongoDB runs as a StatefulSet because database workloads require persistent identity and storage. MongoDB uses a StatefulSet, headless Service, PersistentVolumeClaim, persistent storage, resource requests and limits, readiness probes, and liveness probes.
+* MongoDB setup
+* Backend deployment
+* Frontend deployment
 
-The PersistentVolumeClaim is mounted at `/data/db`. This means MongoDB data is stored independently of the lifecycle of the MongoDB pod. Deleting and recreating the MongoDB pod therefore does not intentionally remove the stored database data.
+An additional Docker installation role is also included to ensure the required container runtime is available before deploying the application services.
 
-## 7. Health Probes
+The purpose of using Ansible is to make server configuration repeatable and consistent instead of relying on manual commands.
 
-Kubernetes health probes were added to improve reliability.
+The roles use declarative Ansible tasks so that repeated execution does not unnecessarily recreate resources that are already in the desired state. This supports idempotent configuration management.
 
-The backend readiness probe checks `/api/books`, and the backend liveness probe also checks `/api/books`.
+The Ansible connection to the provisioned server was verified successfully using the Ansible ping module.
 
-The frontend readiness and liveness probes check `/`.
+## Kubernetes Orchestration
+
+The BookHaven application is deployed on Google Kubernetes Engine (GKE).
+
+Kubernetes was used to manage the frontend, backend, and MongoDB workloads.
+
+The frontend and backend use Kubernetes Deployments because they are stateless application workloads that can be managed and recreated by Kubernetes.
+
+MongoDB uses a StatefulSet because a database requires stable identity and persistent storage.
+
+### Backend
+
+The backend runs as a Kubernetes Deployment using the `hodhan/bookhaven-backend:v1.0.1` image.
+
+The backend:
+
+* Runs on port `5000`
+* Uses one replica
+* Has labels for identification and selection
+* Has CPU and memory resource requests and limits
+* Has a readiness probe
+* Has a liveness probe
+* Is exposed using a LoadBalancer Service
+
+The readiness and liveness probes check the `/api/books` endpoint.
+
+### Frontend
+
+The frontend runs as a Kubernetes Deployment using the `hodhan/bookhaven-frontend:v1.0.3` image.
+
+The frontend:
+
+* Runs on port `80`
+* Uses one replica
+* Has labels for identification and selection
+* Has CPU and memory resource requests and limits
+* Has a readiness probe
+* Has a liveness probe
+* Is exposed using a LoadBalancer Service
+
+The frontend probes check the `/` endpoint.
+
+The LoadBalancer Service provides a public endpoint that allows users to access the BookHaven application.
+
+### MongoDB
+
+MongoDB runs as a StatefulSet because database workloads require persistent identity and persistent storage.
+
+MongoDB uses:
+
+* StatefulSet
+* Headless Service
+* PersistentVolumeClaim
+* Persistent storage
+* Labels
+* CPU and memory resource requests and limits
+* Readiness probe
+* Liveness probe
+
+The PersistentVolumeClaim is mounted at `/data/db`.
+
+This separates the MongoDB data from the lifecycle of the database pod. If the MongoDB pod is deleted and recreated, the persistent storage remains available and can be reattached to the replacement pod.
+
+The MongoDB PersistentVolumeClaim was verified as `Bound`.
+
+## Health Probes
+
+Kubernetes health probes were added to improve application reliability.
+
+The backend readiness and liveness probes check:
+
+`/api/books`
+
+The frontend readiness and liveness probes check:
+
+`/`
 
 MongoDB uses TCP probes against port `27017`.
 
-Readiness probes prevent traffic from being sent to containers that are not ready, while liveness probes allow Kubernetes to detect unhealthy containers and restart them.
+Readiness probes prevent Kubernetes from sending traffic to containers that are not yet ready to serve requests.
 
-## 8. Resource Management
+Liveness probes allow Kubernetes to detect unhealthy containers and restart them when necessary.
 
-Resource requests and limits are configured for every application container.
+## Resource Management
 
-This allows Kubernetes to make scheduling decisions based on expected resource requirements and prevents containers from consuming unlimited cluster resources.
+CPU and memory resource requests and limits are configured for every application container.
 
-## 9. Application Availability
+Resource requests help Kubernetes make scheduling decisions based on the expected resource requirements of each workload.
+
+Resource limits prevent containers from consuming unlimited CPU or memory resources.
+
+This improves the stability and predictability of the Kubernetes environment.
+
+## Application Availability
 
 The frontend is exposed through a Kubernetes LoadBalancer.
 
@@ -123,7 +211,7 @@ Live frontend:
 
 http://34.35.14.77
 
-The backend is also exposed through a LoadBalancer.
+The backend API is also exposed through a Kubernetes LoadBalancer.
 
 Backend API:
 
@@ -131,26 +219,40 @@ http://34.35.116.179:5000/api/books
 
 The frontend loads successfully and displays book data retrieved from the backend API.
 
-## 10. Architecture Diagram
+The Kubernetes deployment was verified with all required pods running:
+
+* BookHaven frontend
+* BookHaven backend
+* MongoDB
+
+## End-to-End DevOps Pipeline
+
+The completed workflow connects source control, automation, containerization, infrastructure provisioning, configuration management, and Kubernetes orchestration.
 
 ```text
-                         GitHub Repository
-                                |
-                                v
-                       GitHub Actions CI/CD
-                                |
-                    +-----------+-----------+
-                    |                       |
-                    v                       v
-             Backend Image            Frontend Image
-                    |                       |
-                    +-----------+-----------+
+Developer
+    |
+    v
+Git Feature Branch
+    |
+    v
+Pull Request
+    |
+    v
+master
+    |
+    v
+GitHub Actions
+    |
+    +--------------------> CI: Install Dependencies + Run Tests
+    |
+    +--------------------> CD: Build Docker Images
                                 |
                                 v
                            Docker Hub
                                 |
                                 v
-                         Kubernetes / GKE
+                     Kubernetes Deployment / GKE
                                 |
               +-----------------+-----------------+
               |                 |                 |
@@ -161,50 +263,31 @@ The frontend loads successfully and displays book data retrieved from the backen
         LoadBalancer      LoadBalancer       Headless Service
               |                 |                 |
               v                 v                 v
-        Live Frontend       Backend API       PersistentVolume
+        Live Frontend       Backend API      Persistent Storage
                                                     |
                                                     v
                                                MongoDB Data
 
+
 Terraform
     |
     v
-Cloud Infrastructure
-
-Ansible
+AWS Infrastructure
+(VPC + Subnet + Security Group + EC2)
     |
     v
-Server / Application Configuration
+Terraform Output
+    |
+    v
+Ansible Inventory
+    |
+    v
+Ansible Roles
+    |
+    +----> Install Docker
+    +----> Setup MongoDB
+    +----> Deploy Backend
+    +----> Deploy Frontend
+```
 
-
-Developer
-   |
-   v
-Git Feature Branch
-   |
-   v
-Pull Request
-   |
-   v
-master
-   |
-   v
-GitHub Actions
-   |
-   +----> Tests / CI
-   |
-   +----> Build Docker Images
-   |
-   +----> Push Images to Docker Hub
-   |
-   v
-Kubernetes / GKE
-   |
-   +----> Frontend
-   |
-   +----> Backend
-   |
-   +----> MongoDB + Persistent Storage
-   |
-   v
-Live BookHaven Application
+This architecture demonstrates the complete DevOps lifecycle used in the project: source control and feature branches, automated CI/CD, containerization, Docker image storage, infrastructure provisioning with Terraform, server configuration with Ansible, and application orchestration using Kubernetes with persistent database storage.
